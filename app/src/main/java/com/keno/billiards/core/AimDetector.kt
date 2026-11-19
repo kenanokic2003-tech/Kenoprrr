@@ -27,7 +27,7 @@ class AimLine(val angle: Double, val visibleLength: Double, val confidence: Doub
  */
 object AimDetector {
 
-    fun detect(f: Frame, table: TableModel, cue: Ball): AimLine? {
+    fun detect(f: Frame, table: TableModel, cue: Ball, mask: BooleanArray? = null): AimLine? {
         val rect = table.rect
         val r = cue.r
         val thr = max(table.feltMinChannel + 55, 130)
@@ -38,6 +38,14 @@ object AimDetector {
             val px = x.roundToInt(); val py = y.roundToInt()
             if (px < 0 || py < 0 || px >= f.width || py >= f.height) return false
             return Hsv.minChannel(f.argb[py * f.width + px]) >= thr
+        }
+
+        // pixels covered by KENO's own drawing carry no information: they neither extend nor break the line
+        fun masked(x: Double, y: Double): Boolean {
+            if (mask == null) return false
+            val px = x.roundToInt(); val py = y.roundToInt()
+            if (px < 0 || py < 0 || px >= f.width || py >= f.height) return false
+            return mask[py * f.width + px]
         }
 
         class Run(val len: Double, val end: Double)
@@ -56,6 +64,8 @@ object AimDetector {
                     if (firstHit < 0) firstHit = d
                     lastHit = d
                     gap = 0
+                } else if (firstHit >= 0 && masked(x, y)) {
+                    // hidden by our own drawing: keep going, but do not count it as line
                 } else {
                     gap++
                     if (firstHit >= 0 && gap > 3) break

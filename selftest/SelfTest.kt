@@ -445,8 +445,8 @@ fun testTracker() {
     fun tick2(d: Double?): TrackerOutput { t2 += 100; return tr2.update(t2, d?.let { Angles.rad(it) }, balls, 9.0, s) }
     tick2(5.0); tick2(5.0); tick2(5.0); tick2(5.0)
     o = tick2(null); check("aim detection drops for 100 ms: line held (stale)", o.state == AimState.STALE)
-    repeat(6) { o = tick2(null) }
-    check("aim line gone for >450 ms: hidden", o.state == AimState.HIDDEN)
+    repeat(10) { o = tick2(null) }
+    check("aim line gone for >900 ms: hidden", o.state == AimState.HIDDEN)
     // live mode follows immediately
     val live = KenoSettings(stabilizeAim = false); val tr3 = AimTracker()
     tr3.update(100, Angles.rad(10.0), balls, 9.0, live)

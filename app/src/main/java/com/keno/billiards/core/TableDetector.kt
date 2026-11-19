@@ -193,10 +193,20 @@ object TableDetector {
                 val mx = st.max()
                 if (mx < 24.0) { found.add(coarse.toInt()); continue }
                 var kk = 4
-                for (k in 4..maxK) if (st[k] >= 0.6 * mx) kk = k
+                // nearest clear step (balls / the cue stick farther in can be stronger than the cushion edge)
+                for (k in 4..maxK) if (st[k] >= 0.4 * mx) { kk = k; break }
                 found.add((coarse + inward * kk).toInt())
             }
-            return if (found.isEmpty()) coarse else medianOf(found).toDouble()
+            if (found.isEmpty()) return coarse
+            // MODE instead of median: balls, the cue stick and the aim line sit on the edge in some columns
+            // and give scattered values, while the clean columns all agree.
+            var best = found[0]; var bestN = -1
+            for (c in found) {
+                val n = found.count { Math.abs(it - c) <= 3 }
+                if (n > bestN) { bestN = n; best = c }
+            }
+            val agree = found.filter { Math.abs(it - best) <= 3 }
+            return agree.average()
         }
         val rowSamples = ArrayList<Int>().also { var q = bandY0; while (q <= bandY1) { it.add(q); q += stepY } }
         val colSamples = ArrayList<Int>().also {

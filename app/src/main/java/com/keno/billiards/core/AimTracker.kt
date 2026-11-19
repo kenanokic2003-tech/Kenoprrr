@@ -32,7 +32,7 @@ class AimTracker {
 
     companion object {
         const val SETTLE_MS = 220L
-        const val AIM_LOSS_HOLD_MS = 450L
+        const val AIM_LOSS_HOLD_MS = 900L
         const val BALL_SETTLE_MS = 400L
         const val JITTER_DEG = 0.25
         const val DEADBAND_DEG = 0.3
@@ -50,7 +50,7 @@ class AimTracker {
                 var best = Double.MAX_VALUE
                 for (q in prev) { val d = b.dist(q); if (d < best) best = d }
                 // unmatched balls (appeared/disappeared through detection noise) are ignored
-                if (best > 0.3 * ballRadius && best < 6.0 * ballRadius) { moved = true; break }
+                if (best > 0.45 * ballRadius && best < 6.0 * ballRadius) { moved = true; break }
             }
         }
         lastBalls = balls

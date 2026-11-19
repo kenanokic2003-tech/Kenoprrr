@@ -51,21 +51,7 @@ object SceneBuilder {
             }
             val preEnd = if (kContact >= 0) kContact else (if (cue.size > 1) 1 else 0)
 
-            // ---- aim line: the game already draws its own white line + ring; KENO never draws over it
-            //      (drawing over it made the analyser lose the line). KENO only adds its own ring when
-            //      its contact point clearly disagrees with where the game's line ends. ----
-            if (s.showAimLine && cue.size > 1 && contact != null) {
-                val from = cue[0]
-                val vis = res.aim?.visibleLength ?: 0.0
-                val dir = (contact.cueAtContact - from).norm()
-                val gameEnd = from + dir * vis
-                if (vis <= 0.0 || gameEnd.dist(contact.cueAtContact) > 1.6 * r) {
-                    val start = max(1.2 * r, vis + PAD)
-                    if (start < from.dist(contact.cueAtContact))
-                        prims.add(PLine(listOf(from + dir * start, contact.cueAtContact), withAlpha(AIM, a), 3.0))
-                    prims.add(PCircle(contact.cueAtContact, r, withAlpha(AIM, a), 2.4))
-                }
-            }
+            // The game already draws its own aim line and ring: KENO never draws over them.
 
             // ---- every ball the shot moves is drawn in ITS OWN colour, with a ring where it ends ----
             fun colorOf(i: Int): Int = det.balls.getOrNull(i)?.color ?: TARGET
@@ -84,15 +70,6 @@ object SceneBuilder {
                     val pts = if (s.extendAim) cutAfterBounces(post, maxB) else limitLength(post.subList(0, 2), 6 * r)
                     glowLine(prims, pts, withAlpha(CUE, a), 2.8, true)
                     if (s.showFinalPositions && s.extendAim && pts.size == post.size) endMarker(prims, pred.cue, r, CUE, a, "BIJELA")
-                }
-            }
-            if (s.extendAim && s.showTargetPath) {
-                for (o in pred.others) {
-                    if (o.points.size < 2 || TableGeometry.pathLength(o.points) < 2.0 * r) continue
-                    val col = colorOf(o.ballIndex)
-                    val pts = cutAfterBounces(o.points, maxB)
-                    glowLine(prims, pts, withAlpha(col, if (stale) 0x66 else 0xDD), 2.6, false)
-                    if (s.showFinalPositions && pts.size == o.points.size) endMarker(prims, o, r, col, if (stale) 0x66 else 0xDD, "")
                 }
             }
 

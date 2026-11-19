@@ -85,7 +85,7 @@ class KenoAnalyzer {
         }
 
         // ---- aim line (game's own guide line) ----
-        val aim = AimDetector.detect(frame, tb, cue)
+        val aim = AimDetector.detect(frame, tb, cue, mask)
         val out = tracker.update(nowMs, aim?.angle, det.balls.map { it.pos }, det.radius, s)
 
         // ---- prediction ----
